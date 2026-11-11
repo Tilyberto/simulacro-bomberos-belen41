@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XI Comandancia Departamental Loreto - Simulacro Oficial</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f6fa; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 90vh; }
+        .contenedor { background: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 100%; max-width: 650px; }
+        
+        /* Estilo para el encabezado alineado a la izquierda */
+        .nav-header { display: flex; align-items: center; gap: 15px; border-bottom: 2px solid #e74c3c; padding-bottom: 12px; margin-bottom: 20px; }
+        .nav-header img { height: 50px; width: auto; object-fit: contain; }
+        .titulo-container { display: flex; flex-direction: column; }
+        .nav-header h2 { color: #c0392b; margin: 0; font-size: 1.15em; font-weight: 700; }
+        .sub-titulo { font-size: 0.85em; font-weight: bold; color: #7f8c8d; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Cuadrícula de modos */
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .btn-modo { padding: 15px; background: #ffffff; color: #2c3e50; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 0.95em; cursor: pointer; text-align: left; transition: all 0.2s; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .btn-modo span { display: block; font-size: 0.8em; font-weight: normal; color: #7f8c8d; margin-top: 4px; }
+        .btn-modo:hover { border-color: #e74c3c; background: #fff5f5; transform: translateY(-2px); }
+        
+        /* Estilo especial para el botón de Modo Estudio con respuestas */
+        .btn-modo.estudio { border-color: #27ae60; background: #f0fdf4; color: #166534; }
+        .btn-modo.estudio:hover { background: #dcfce7; border-color: #16a34a; }
+
+        /* Buscador superior del Modo Estudio */
+        .buscador-container { margin-bottom: 15px; }
+        .buscador-container input { width: 100%; padding: 12px; border: 2px solid #27ae60; border-radius: 8px; font-size: 0.95em; box-sizing: border-box; background-color: #f0fdf4; }
+        .buscador-container input:focus { outline: none; border-color: #16a34a; }
+
+        .progreso { font-size: 0.9em; color: #7f8c8d; margin-bottom: 15px; font-weight: bold; }
+        .pregunta { font-size: 1.1em; color: #2c3e50; margin-bottom: 20px; line-height: 1.5; font-weight: 600; }
+        
+        .opcion { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 12px; margin: 8px 0; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 6px; font-size: 1em; text-align: left; cursor: pointer; transition: all 0.2s; box-sizing: border-box; }
+        .opcion:hover { background: #f8fafc; border-color: #94a3b8; }
+        .opcion:disabled { cursor: default; }
+        
+        /* Estilos de respuesta */
+        .correcta { background: #dcfce7 !important; color: #166534 !important; border-color: #27ae60 !important; font-weight: bold; }
+        .incorrecta { background: #fee2e2 !important; color: #991b1b !important; border-color: #ef4444 !important; }
+        
+        .badge-correcta { background: #27ae60; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.8em; font-weight: bold; }
+
+        /* Botones de acción anchos y alineados */
+        .botones-accion { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .btn-accion-principal { width: 100%; padding: 12px 15px; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; font-weight: bold; color: white; background: #2c3e50; display: none; box-sizing: border-box; text-align: center; }
+        .btn-accion-principal:hover { background: #1a252f; }
+        
+        .btn-volver { width: 100%; padding: 12px 15px; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; font-weight: bold; color: white; background: #7f8c8d; box-sizing: border-box; text-align: center; }
+        .btn-volver:hover { background: #626d70; }
+        
+        #quiz-pantalla, #resultado, #menu-config { display: none; }
+        #menu-config { display: block; }
+        #resultado { text-align: center; font-size: 1.3em; color: #2c3e50; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="contenedor">
+    
+    <!-- MENÚ DE CONFIGURACIÓN PRINCIPAL -->
+    <div id="menu-config">
+        <div class="nav-header">
+            <img src="escudo.png" alt="Escudo Institucional" onerror="this.style.display='none'">
+            <div class="titulo-container">
+                <h2>XI Comandancia Departamental Loreto</h2>
+                <span class="sub-titulo">Belén N° 41</span>
+            </div>
+        </div>
+        <h6 style="color: #7f8c8d; margin: 0 0 10px 0; text-transform: uppercase; font-size: 0.9em;">Simulacro 2026</h6>
+        
+        <div class="config-grid">
+            <button class="btn-modo" onclick="iniciarSimulacro('secuencial')">
+                📚 200 Secuencial
+                <span>Estudio ordenado del 1 al 200.</span>
+            </button>
+            <button class="btn-modo" onclick="iniciarSimulacro('aleatorio')">
+                🔀 200 Aleatorio
+                <span>Banco mezclado al azar.</span>
+            </button>
+            <button class="btn-modo" onclick="iniciarSimulacro('examen')">
+                ⏱️ 20 Aleatorias
+                <span>Examen corto evaluativo.</span>
+            </button>
+            <button class="btn-modo estudio" onclick="iniciarSimulacro('estudio')">
+                🟢 Modo Estudio con respuestas
+                <span>Ver respuestas correctas sombreadas.</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- PANTALLA DEL QUIZ / ESTUDIO -->
+    <div id="quiz-pantalla">
+        <div class="nav-header">
+            <img src="escudo.png" alt="Escudo Institucional" onerror="this.style.display='none'">
+            <div class="titulo-container">
+                <h2>XI Comandancia Departamental Loreto</h2>
+                <span class="sub-titulo">Belén N° 41</span>
+            </div>
+        </div>
+
+        <!-- Barra de búsqueda superior exclusiva para Modo Estudio -->
+        <div class="buscador-container" id="contenedor-buscador" style="display: none;">
+            <input type="text" id="buscador-estudio" placeholder="🔍 Buscar en preguntas y alternativas..." oninput="filtrarPreguntasFlexible(this.value)">
+        </div>
+
+        <div class="progreso" id="progreso">Cargando...</div>
+        <div class="pregunta" id="texto-pregunta">Cargando...</div>
+        <div id="opciones"></div>
+        
+        <div class="botones-accion">
+            <button id="btn-siguiente" class="btn-accion-principal" onclick="siguientePregunta()">Siguiente Pregunta</button>
+            <button class="btn-volver" onclick="volverAlMenu()">Regresar al Menú</button>
+        </div>
+    </div>
+    
+    <!-- PANTALLA DE RESULTADOS -->
+    <div id="resultado">
+        <div class="nav-header">
+            <img src="escudo.png" alt="Escudo Institucional" onerror="this.style.display='none'">
+            <div class="titulo-container">
+                <h2>XI Comandancia Departamental Loreto</h2>
+                <span class="sub-titulo">Belén N° 41</span>
+            </div>
+        </div>
+        <p>🎉 <strong>¡Simulacro Finalizado!</strong></p>
+        <p>Tu puntaje obtenido es: <span id="puntaje-final" style="color: #c0392b; font-weight: bold;">0</span> / <span id="total-preguntas">0</span></p>
+        <button id="btn-reiniciar" class="btn-volver" onclick="volverAlMenu()" style="display: block; width: 100%; margin-top: 20px;">Regresar al Menú Principal</button>
+    </div>
+</div>
+
+<script>
+    let bancoCompleto = [];
+    let preguntasActivas = [];
+    let preguntaActual = 0;
+    let puntaje = 0;
+    let modoActual = '';
+
+    async function cargarBanco() {
+        try {
+            const respuesta = await fetch('preguntas.json');
+            bancoCompleto = await respuesta.json();
+        } catch (e) {
+            console.error("Error al leer el archivo JSON local:", e);
+        }
+    }
+
+    async function iniciarSimulacro(modo) {
+        if (bancoCompleto.length === 0) {
+            await cargarBanco();
+        }
+
+        modoActual = modo;
+
+        if (modo === 'secuencial' || modo === 'estudio') {
+            preguntasActivas = [...bancoCompleto];
+        } else if (modo === 'aleatorio') {
+            preguntasActivas = [...bancoCompleto].sort(() => 0.5 - Math.random());
+        } else if (modo === 'examen') {
+            const limite = Math.min(20, bancoCompleto.length);
+            preguntasActivas = [...bancoCompleto].sort(() => 0.5 - Math.random()).slice(0, limite);
+        }
+
+        preguntaActual = 0;
+        puntaje = 0;
+
+        const buscadorEl = document.getElementById("contenedor-buscador");
+        if (modo === 'estudio') {
+            buscadorEl.style.display = "block";
+            document.getElementById("buscador-estudio").value = "";
+        } else {
+            buscadorEl.style.display = "none";
+        }
+
+        document.getElementById("menu-config").style.display = "none";
+        document.getElementById("resultado").style.display = "none";
+        document.getElementById("quiz-pantalla").style.display = "block";
+        cargarPregunta();
+    }
+
+    function cargarPregunta() {
+        const pre = preguntasActivas[preguntaActual];
+        document.getElementById("texto-pregunta").innerText = pre.pregunta;
+        document.getElementById("progreso").innerText = `Pregunta ${preguntaActual + 1} de ${preguntasActivas.length}`;
+        
+        const contenedorOpciones = document.getElementById("opciones");
+        contenedorOpciones.innerHTML = ""; 
+        
+        const btnSiguiente = document.getElementById("btn-siguiente");
+        if (modoActual === 'estudio') {
+            btnSiguiente.style.display = "block";
+            btnSiguiente.innerText = (preguntaActual === preguntasActivas.length - 1) ? "Finalizar Estudio" : "Siguiente Pregunta";
+        } else {
+            btnSiguiente.style.display = "none";
+        }
+
+        pre.opciones.forEach((opcion, index) => {
+            const btn = document.createElement("button");
+            btn.className = "opcion";
+            
+            if (modoActual === 'estudio') {
+                btn.disabled = true;
+                if (index === pre.respuestaCorrecta) {
+                    btn.classList.add("correcta");
+                    const badge = document.createElement("span");
+                    badge.className = "badge-correcta";
+                    badge.innerText = "Respuesta Correcta";
+                    btn.appendChild(document.createTextNode(opcion));
+                    btn.appendChild(badge);
+                } else {
+                    btn.innerText = opcion;
+                }
+            } else {
+                btn.innerText = opcion;
+                btn.onclick = () => verificarRespuesta(index, btn);
+            }
+            
+            contenedorOpciones.appendChild(btn);
+        });
+    }
+
+    function verificarRespuesta(indiceSeleccionado, botonSeleccionado) {
+        const botones = document.querySelectorAll(".opcion");
+        const indiceCorrecto = preguntasActivas[preguntaActual].respuestaCorrecta;
+
+        botones.forEach(btn => btn.disabled = true);
+
+        if (indiceSeleccionado === indiceCorrecto) {
+            botonSeleccionado.classList.add("correcta");
+            puntaje++;
+        } else {
+            botonSeleccionado.classList.add("incorrecta");
+            botones[indiceCorrecto].classList.add("correcta");
+        }
+
+        document.getElementById("btn-siguiente").style.display = "block";
+    }
+
+    function siguientePregunta() {
+        preguntaActual++;
+        if (preguntaActual < preguntasActivas.length) {
+            cargarPregunta();
+        } else {
+            if (modoActual === 'estudio') {
+                volverAlMenu();
+            } else {
+                mostrarResultados();
+            }
+        }
+    }
+
+    function mostrarResultados() {
+        document.getElementById("quiz-pantalla").style.display = "none";
+        document.getElementById("resultado").style.display = "block";
+        document.getElementById("puntaje-final").innerText = puntaje;
+        document.getElementById("total-preguntas").innerText = preguntasActivas.length;
+    }
+
+    function volverAlMenu() {
+        document.getElementById("resultado").style.display = "none";
+        document.getElementById("quiz-pantalla").style.display = "none";
+        document.getElementById("menu-config").style.display = "block";
+    }
+
+    // Función auxiliar para quitar tildes y normalizar textos
+    function normalizarTexto(texto) {
+        return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
+
+    // Buscador global inteligente: busca tanto en el enunciado como en las opciones A, B, C, D
+    function filtrarPreguntasFlexible(texto) {
+        const textoLimpio = normalizarTexto(texto.trim());
+        
+        if (textoLimpio === "") {
+            preguntasActivas = [...bancoCompleto];
+        } else {
+            const palabrasBusqueda = textoLimpio.split(/\s+/);
+            
+            preguntasActivas = bancoCompleto.filter(p => {
+                // Combinamos el texto de la pregunta con todas sus opciones en un solo bloque de búsqueda
+                let textoCompletoItem = normalizarTexto(p.pregunta + " " + p.opciones.join(" "));
+                
+                let palabrasCoinciden = 0;
+                palabrasBusqueda.forEach(palabra => {
+                    if (textoCompletoItem.includes(palabra)) {
+                        palabrasCoinciden++;
+                    }
+                });
+                
+                return (palabrasCoinciden / palabrasBusqueda.length) >= 0.7;
+            });
+        }
+
+        preguntaActual = 0;
+        if (preguntasActivas.length > 0) {
+            cargarPregunta();
+        } else {
+            document.getElementById("texto-pregunta").innerText = "No se encontraron coincidencias en preguntas ni alternativas. Intenta con otras palabras clave.";
+            document.getElementById("opciones").innerHTML = "";
+            document.getElementById("btn-siguiente").style.display = "none";
+        }
+    }
+
+    cargarBanco();
+</script>
+
+</body>
+</html>
