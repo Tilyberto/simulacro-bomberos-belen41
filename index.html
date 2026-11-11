@@ -6,7 +6,7 @@
     <title>XI Comandancia Departamental Loreto - Simulacro Oficial</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f6fa; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 90vh; }
-        .contenedor { background: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 100%; max-width: 650px; }
+        .contenedor { background: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 100%; max-width: 650px; box-sizing: border-box; }
         
         /* Estilo para el encabezado alineado a la izquierda */
         .nav-header { display: flex; align-items: center; gap: 15px; border-bottom: 2px solid #e74c3c; padding-bottom: 12px; margin-bottom: 20px; }
@@ -43,12 +43,22 @@
         
         .badge-correcta { background: #27ae60; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.8em; font-weight: bold; }
 
-        /* Botones de acción anchos y alineados */
-        .botones-accion { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        .btn-accion-principal { width: 100%; padding: 12px 15px; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; font-weight: bold; color: white; background: #2c3e50; display: none; box-sizing: border-box; text-align: center; }
+        /* Barra de navegación avanzada para Modo Estudio */
+        .nav-estudio-bar { display: flex; gap: 8px; align-items: center; margin-top: 20px; width: 100%; }
+        .btn-navegar { background: #2c3e50; color: white; border: none; padding: 12px 16px; border-radius: 6px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .btn-navegar:hover { background: #1a252f; }
+        .btn-navegar:disabled { background: #94a3b8; cursor: default; }
+        
+        .saltar-container { display: flex; gap: 5px; flex: 1; justify-content: center; align-items: center; background: #f1f5f9; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; }
+        .saltar-container input { width: 60px; padding: 8px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.95em; font-weight: bold; }
+        .btn-ir { background: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .btn-ir:hover { background: #219653; }
+
+        /* Botones de acción anchos estándar para otros modos */
+        .btn-accion-principal { width: 100%; padding: 12px 15px; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; font-weight: bold; color: white; background: #2c3e50; display: none; box-sizing: border-box; text-align: center; margin-top: 20px; }
         .btn-accion-principal:hover { background: #1a252f; }
         
-        .btn-volver { width: 100%; padding: 12px 15px; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; font-weight: bold; color: white; background: #7f8c8d; box-sizing: border-box; text-align: center; }
+        .btn-volver { width: 100%; padding: 12px 15px; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; font-weight: bold; color: white; background: #7f8c8d; box-sizing: border-box; text-align: center; margin-top: 10px; }
         .btn-volver:hover { background: #626d70; }
         
         #quiz-pantalla, #resultado, #menu-config { display: none; }
@@ -110,10 +120,21 @@
         <div class="pregunta" id="texto-pregunta">Cargando...</div>
         <div id="opciones"></div>
         
-        <div class="botones-accion">
-            <button id="btn-siguiente" class="btn-accion-principal" onclick="siguientePregunta()">Siguiente Pregunta</button>
-            <button class="btn-volver" onclick="volverAlMenu()">Regresar al Menú</button>
+        <!-- Botón Siguiente para exámenes normales -->
+        <button id="btn-siguiente" class="btn-accion-principal" onclick="siguientePregunta()">Siguiente Pregunta</button>
+        
+        <!-- Barra de navegación avanzada exclusiva para Modo Estudio (Atrás, Salto por número, Adelante) -->
+        <div class="nav-estudio-bar" id="barra-modo-estudio" style="display: none;">
+            <button class="btn-navegar" onclick="preguntaAnterior()" title="Pregunta Anterior">◀</button>
+            <div class="saltar-container">
+                <span style="font-size: 0.85em; font-weight: bold; color: #475569;">Ir a:</span>
+                <input type="number" id="input-num-pregunta" min="1" max="200" placeholder="1">
+                <button class="btn-ir" onclick="saltarAPregunta()">Ir</button>
+            </div>
+            <button class="btn-navegar" onclick="siguientePregunta()" title="Pregunta Siguiente">▶</button>
         </div>
+
+        <button class="btn-volver" onclick="volverAlMenu()">Regresar al Menú</button>
     </div>
     
     <!-- PANTALLA DE RESULTADOS -->
@@ -167,11 +188,15 @@
         puntaje = 0;
 
         const buscadorEl = document.getElementById("contenedor-buscador");
+        const barraEstudioEl = document.getElementById("barra-modo-estudio");
+
         if (modo === 'estudio') {
             buscadorEl.style.display = "block";
+            barraEstudioEl.style.display = "flex";
             document.getElementById("buscador-estudio").value = "";
         } else {
             buscadorEl.style.display = "none";
+            barraEstudioEl.style.display = "none";
         }
 
         document.getElementById("menu-config").style.display = "none";
@@ -185,15 +210,20 @@
         document.getElementById("texto-pregunta").innerText = pre.pregunta;
         document.getElementById("progreso").innerText = `Pregunta ${preguntaActual + 1} de ${preguntasActivas.length}`;
         
+        // Actualizar el valor del input numérico en modo estudio si existe
+        const inputNum = document.getElementById("input-num-pregunta");
+        if (inputNum) {
+            inputNum.value = preguntaActual + 1;
+        }
+
         const contenedorOpciones = document.getElementById("opciones");
         contenedorOpciones.innerHTML = ""; 
         
         const btnSiguiente = document.getElementById("btn-siguiente");
         if (modoActual === 'estudio') {
-            btnSiguiente.style.display = "block";
-            btnSiguiente.innerText = (preguntaActual === preguntasActivas.length - 1) ? "Finalizar Estudio" : "Siguiente Pregunta";
+            btnSiguiente.style.display = "none"; // Se reemplaza por la barra inferior de flechas
         } else {
-            btnSiguiente.style.display = "none";
+            btnSiguiente.style.display = "block";
         }
 
         pre.opciones.forEach((opcion, index) => {
@@ -244,11 +274,32 @@
             cargarPregunta();
         } else {
             if (modoActual === 'estudio') {
-                volverAlMenu();
+                preguntaActual = preguntasActivas.length - 1; // Limitar al final
             } else {
                 mostrarResultados();
             }
         }
+    }
+
+    function preguntaAnterior() {
+        if (preguntaActual > 0) {
+            preguntaActual--;
+            cargarPregunta();
+        }
+    }
+
+    function saltarAPregunta() {
+        const inputNum = document.getElementById("input-num-pregunta");
+        let numeroDeseado = parseInt(inputNum.value);
+        
+        if (isNaN(numeroDeseado)) return;
+
+        // Ajustar al rango válido (1 hasta el total de preguntas activas)
+        if (numeroDeseado < 1) numeroDeseado = 1;
+        if (numeroDeseado > preguntasActivas.length) numeroDeseado = preguntasActivas.length;
+
+        preguntaActual = numeroDeseado - 1;
+        cargarPregunta();
     }
 
     function mostrarResultados() {
@@ -264,12 +315,10 @@
         document.getElementById("menu-config").style.display = "block";
     }
 
-    // Función auxiliar para quitar tildes y normalizar textos
     function normalizarTexto(texto) {
         return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     }
 
-    // Buscador global inteligente: busca tanto en el enunciado como en las opciones A, B, C, D
     function filtrarPreguntasFlexible(texto) {
         const textoLimpio = normalizarTexto(texto.trim());
         
@@ -279,16 +328,13 @@
             const palabrasBusqueda = textoLimpio.split(/\s+/);
             
             preguntasActivas = bancoCompleto.filter(p => {
-                // Combinamos el texto de la pregunta con todas sus opciones en un solo bloque de búsqueda
                 let textoCompletoItem = normalizarTexto(p.pregunta + " " + p.opciones.join(" "));
-                
                 let palabrasCoinciden = 0;
                 palabrasBusqueda.forEach(palabra => {
                     if (textoCompletoItem.includes(palabra)) {
                         palabrasCoinciden++;
                     }
                 });
-                
                 return (palabrasCoinciden / palabrasBusqueda.length) >= 0.7;
             });
         }
@@ -299,7 +345,6 @@
         } else {
             document.getElementById("texto-pregunta").innerText = "No se encontraron coincidencias en preguntas ni alternativas. Intenta con otras palabras clave.";
             document.getElementById("opciones").innerHTML = "";
-            document.getElementById("btn-siguiente").style.display = "none";
         }
     }
 
