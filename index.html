@@ -6,29 +6,36 @@
     <title>XI Comandancia Departamental Loreto - Simulacro Oficial</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f6fa; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 90vh; }
-        .contenedor { background: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 100%; max-width: 650px; box-sizing: border-box; }
+        .contenedor { background: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 100%; max-width: 650px; box-sizing: border-box; position: relative; padding-bottom: 45px; }
         
-        /* Estilo para el encabezado alineado a la izquierda */
         .nav-header { display: flex; align-items: center; gap: 15px; border-bottom: 2px solid #e74c3c; padding-bottom: 12px; margin-bottom: 20px; }
         .nav-header img { height: 50px; width: auto; object-fit: contain; }
         .titulo-container { display: flex; flex-direction: column; }
         .nav-header h2 { color: #c0392b; margin: 0; font-size: 1.15em; font-weight: 700; }
         .sub-titulo { font-size: 0.85em; font-weight: bold; color: #7f8c8d; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Cuadrícula de modos */
         .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         .btn-modo { padding: 15px; background: #ffffff; color: #2c3e50; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 0.95em; cursor: pointer; text-align: left; transition: all 0.2s; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .btn-modo span { display: block; font-size: 0.8em; font-weight: normal; color: #7f8c8d; margin-top: 4px; }
         .btn-modo:hover { border-color: #e74c3c; background: #fff5f5; transform: translateY(-2px); }
         
-        /* Estilo especial para el botón de Modo Estudio con respuestas */
         .btn-modo.estudio { border-color: #27ae60; background: #f0fdf4; color: #166534; }
         .btn-modo.estudio:hover { background: #dcfce7; border-color: #16a34a; }
 
-        /* Buscador superior del Modo Estudio */
         .buscador-container { margin-bottom: 15px; }
         .buscador-container input { width: 100%; padding: 12px; border: 2px solid #27ae60; border-radius: 8px; font-size: 0.95em; box-sizing: border-box; background-color: #f0fdf4; }
         .buscador-container input:focus { outline: none; border-color: #16a34a; }
+
+        /* Controles de Navegación del Modo Estudio */
+        .navegacion-estudio { margin-bottom: 20px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .nav-fila-botones { display: flex; gap: 10px; margin-bottom: 10px; }
+        .btn-nav { flex: 1; padding: 10px; background: #2c3e50; color: white; border: none; border-radius: 6px; font-size: 0.95em; font-weight: bold; cursor: pointer; text-align: center; transition: background 0.2s; }
+        .btn-nav:hover { background: #1a252f; }
+        .nav-fila-ir { display: flex; gap: 8px; align-items: center; }
+        .nav-fila-ir span { font-size: 0.9em; font-weight: bold; color: #475569; white-space: nowrap; }
+        .nav-fila-ir input { flex: 1; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95em; box-sizing: border-box; }
+        .btn-ir { padding: 8px 16px; background: #27ae60; color: white; border: none; border-radius: 6px; font-size: 0.95em; font-weight: bold; cursor: pointer; }
+        .btn-ir:hover { background: #219653; }
 
         .progreso { font-size: 0.9em; color: #7f8c8d; margin-bottom: 15px; font-weight: bold; }
         .pregunta { font-size: 1.1em; color: #2c3e50; margin-bottom: 20px; line-height: 1.5; font-weight: 600; }
@@ -37,30 +44,21 @@
         .opcion:hover { background: #f8fafc; border-color: #94a3b8; }
         .opcion:disabled { cursor: default; }
         
-        /* Estilos de respuesta */
         .correcta { background: #dcfce7 !important; color: #166534 !important; border-color: #27ae60 !important; font-weight: bold; }
         .incorrecta { background: #fee2e2 !important; color: #991b1b !important; border-color: #ef4444 !important; }
         
         .badge-correcta { background: #27ae60; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.8em; font-weight: bold; }
 
-        /* Barra de navegación avanzada para Modo Estudio */
-        .nav-estudio-bar { display: flex; gap: 8px; align-items: center; margin-top: 20px; width: 100%; }
-        .btn-navegar { background: #2c3e50; color: white; border: none; padding: 12px 16px; border-radius: 6px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-        .btn-navegar:hover { background: #1a252f; }
-        .btn-navegar:disabled { background: #94a3b8; cursor: default; }
-        
-        .saltar-container { display: flex; gap: 5px; flex: 1; justify-content: center; align-items: center; background: #f1f5f9; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; }
-        .saltar-container input { width: 60px; padding: 8px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.95em; font-weight: bold; }
-        .btn-ir { background: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .btn-ir:hover { background: #219653; }
-
-        /* Botones de acción anchos estándar para otros modos */
-        .btn-accion-principal { width: 100%; padding: 12px 15px; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; font-weight: bold; color: white; background: #2c3e50; display: none; box-sizing: border-box; text-align: center; margin-top: 20px; }
+        .botones-accion { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .btn-accion-principal { width: 100%; padding: 12px 15px; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; font-weight: bold; color: white; background: #2c3e50; display: none; box-sizing: border-box; text-align: center; }
         .btn-accion-principal:hover { background: #1a252f; }
         
-        .btn-volver { width: 100%; padding: 12px 15px; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; font-weight: bold; color: white; background: #7f8c8d; box-sizing: border-box; text-align: center; margin-top: 10px; }
+        .btn-volver { width: 100%; padding: 12px 15px; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; font-weight: bold; color: white; background: #7f8c8d; box-sizing: border-box; text-align: center; }
         .btn-volver:hover { background: #626d70; }
         
+        /* Firma de autoría en gris sutil en la esquina inferior derecha */
+        .firma-autor { position: absolute; bottom: 12px; right: 20px; font-size: 0.75em; color: #94a3b8; font-style: italic; letter-spacing: 0.3px; user-select: none; }
+
         #quiz-pantalla, #resultado, #menu-config { display: none; }
         #menu-config { display: block; }
         #resultado { text-align: center; font-size: 1.3em; color: #2c3e50; margin-top: 20px; }
@@ -116,25 +114,27 @@
             <input type="text" id="buscador-estudio" placeholder="🔍 Buscar en preguntas y alternativas..." oninput="filtrarPreguntasFlexible(this.value)">
         </div>
 
+        <!-- Controles de Navegación Rápida para Modo Estudio -->
+        <div class="navegacion-estudio" id="nav-estudio" style="display: none;">
+            <div class="nav-fila-botones">
+                <button class="btn-nav" onclick="preguntaAnteriorEstudio()">⬅️ Anterior</button>
+                <button class="btn-nav" onclick="siguientePreguntaEstudio()">Siguiente ➡️</button>
+            </div>
+            <div class="nav-fila-ir">
+                <span>Ir a pregunta:</span>
+                <input type="number" id="input-num-pregunta" min="1" max="200" placeholder="Ej. 110">
+                <button class="btn-ir" onclick="saltarAPreguntaEstudio()">Ir</button>
+            </div>
+        </div>
+
         <div class="progreso" id="progreso">Cargando...</div>
         <div class="pregunta" id="texto-pregunta">Cargando...</div>
         <div id="opciones"></div>
         
-        <!-- Botón Siguiente para exámenes normales -->
-        <button id="btn-siguiente" class="btn-accion-principal" onclick="siguientePregunta()">Siguiente Pregunta</button>
-        
-        <!-- Barra de navegación avanzada exclusiva para Modo Estudio (Atrás, Salto por número, Adelante) -->
-        <div class="nav-estudio-bar" id="barra-modo-estudio" style="display: none;">
-            <button class="btn-navegar" onclick="preguntaAnterior()" title="Pregunta Anterior">◀</button>
-            <div class="saltar-container">
-                <span style="font-size: 0.85em; font-weight: bold; color: #475569;">Ir a:</span>
-                <input type="number" id="input-num-pregunta" min="1" max="200" placeholder="1">
-                <button class="btn-ir" onclick="saltarAPregunta()">Ir</button>
-            </div>
-            <button class="btn-navegar" onclick="siguientePregunta()" title="Pregunta Siguiente">▶</button>
+        <div class="botones-accion">
+            <button id="btn-siguiente" class="btn-accion-principal" onclick="siguientePregunta()">Siguiente Pregunta</button>
+            <button class="btn-volver" onclick="volverAlMenu()">Regresar al Menú</button>
         </div>
-
-        <button class="btn-volver" onclick="volverAlMenu()">Regresar al Menú</button>
     </div>
     
     <!-- PANTALLA DE RESULTADOS -->
@@ -150,6 +150,9 @@
         <p>Tu puntaje obtenido es: <span id="puntaje-final" style="color: #c0392b; font-weight: bold;">0</span> / <span id="total-preguntas">0</span></p>
         <button id="btn-reiniciar" class="btn-volver" onclick="volverAlMenu()" style="display: block; width: 100%; margin-top: 20px;">Regresar al Menú Principal</button>
     </div>
+
+    <!-- FIRMA DISCRETA AL PIE -->
+    <div class="firma-autor">Creado por Secc. R. Daniel Vásquez T.</div>
 </div>
 
 <script>
@@ -188,15 +191,16 @@
         puntaje = 0;
 
         const buscadorEl = document.getElementById("contenedor-buscador");
-        const barraEstudioEl = document.getElementById("barra-modo-estudio");
+        const navEstudioEl = document.getElementById("nav-estudio");
 
         if (modo === 'estudio') {
             buscadorEl.style.display = "block";
-            barraEstudioEl.style.display = "flex";
+            navEstudioEl.style.display = "block";
             document.getElementById("buscador-estudio").value = "";
+            document.getElementById("input-num-pregunta").max = bancoCompleto.length;
         } else {
             buscadorEl.style.display = "none";
-            barraEstudioEl.style.display = "none";
+            navEstudioEl.style.display = "none";
         }
 
         document.getElementById("menu-config").style.display = "none";
@@ -210,18 +214,12 @@
         document.getElementById("texto-pregunta").innerText = pre.pregunta;
         document.getElementById("progreso").innerText = `Pregunta ${preguntaActual + 1} de ${preguntasActivas.length}`;
         
-        // Actualizar el valor del input numérico en modo estudio si existe
-        const inputNum = document.getElementById("input-num-pregunta");
-        if (inputNum) {
-            inputNum.value = preguntaActual + 1;
-        }
-
         const contenedorOpciones = document.getElementById("opciones");
         contenedorOpciones.innerHTML = ""; 
         
         const btnSiguiente = document.getElementById("btn-siguiente");
         if (modoActual === 'estudio') {
-            btnSiguiente.style.display = "none"; // Se reemplaza por la barra inferior de flechas
+            btnSiguiente.style.display = "none";
         } else {
             btnSiguiente.style.display = "block";
         }
@@ -273,33 +271,37 @@
         if (preguntaActual < preguntasActivas.length) {
             cargarPregunta();
         } else {
-            if (modoActual === 'estudio') {
-                preguntaActual = preguntasActivas.length - 1; // Limitar al final
-            } else {
-                mostrarResultados();
-            }
+            mostrarResultados();
         }
     }
 
-    function preguntaAnterior() {
+    function preguntaAnteriorEstudio() {
         if (preguntaActual > 0) {
             preguntaActual--;
             cargarPregunta();
         }
     }
 
-    function saltarAPregunta() {
-        const inputNum = document.getElementById("input-num-pregunta");
-        let numeroDeseado = parseInt(inputNum.value);
-        
-        if (isNaN(numeroDeseado)) return;
+    function siguientePreguntaEstudio() {
+        if (preguntaActual < preguntasActivas.length - 1) {
+            preguntaActual++;
+            cargarPregunta();
+        }
+    }
 
-        // Ajustar al rango válido (1 hasta el total de preguntas activas)
-        if (numeroDeseado < 1) numeroDeseado = 1;
-        if (numeroDeseado > preguntasActivas.length) numeroDeseado = preguntasActivas.length;
-
-        preguntaActual = numeroDeseado - 1;
-        cargarPregunta();
+    function saltarAPreguntaEstudio() {
+        const inputVal = parseInt(document.getElementById("input-num-pregunta").value);
+        if (!isNaN(inputVal) && inputVal >= 1 && inputVal <= bancoCompleto.length) {
+            if (preguntasActivas.length !== bancoCompleto.length) {
+                preguntasActivas = [...bancoCompleto];
+                document.getElementById("buscador-estudio").value = "";
+            }
+            preguntaActual = inputVal - 1;
+            cargarPregunta();
+            document.getElementById("input-num-pregunta").value = "";
+        } else {
+            alert(`Por favor ingrese un número válido entre 1 y ${bancoCompleto.length}`);
+        }
     }
 
     function mostrarResultados() {
