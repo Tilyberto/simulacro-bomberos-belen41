@@ -26,8 +26,8 @@
         .buscador-container input { width: 100%; padding: 12px; border: 2px solid #27ae60; border-radius: 8px; font-size: 0.95em; box-sizing: border-box; background-color: #f0fdf4; }
         .buscador-container input:focus { outline: none; border-color: #16a34a; }
 
-        /* Controles de Navegación del Modo Estudio */
-        .navegacion-estudio { margin-bottom: 20px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        /* Controles de Navegación Inferior (Unificados) */
+        .navegacion-inferior { margin-top: 20px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: none; }
         .nav-fila-botones { display: flex; gap: 10px; margin-bottom: 10px; }
         .btn-nav { flex: 1; padding: 10px; background: #2c3e50; color: white; border: none; border-radius: 6px; font-size: 0.95em; font-weight: bold; cursor: pointer; text-align: center; transition: background 0.2s; }
         .btn-nav:hover { background: #1a252f; }
@@ -56,7 +56,6 @@
         .btn-volver { width: 100%; padding: 12px 15px; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; font-weight: bold; color: white; background: #7f8c8d; box-sizing: border-box; text-align: center; }
         .btn-volver:hover { background: #626d70; }
         
-        /* Firma de autoría en gris sutil en la esquina inferior derecha */
         .firma-autor { position: absolute; bottom: 12px; right: 20px; font-size: 0.75em; color: #94a3b8; font-style: italic; letter-spacing: 0.3px; user-select: none; }
 
         #quiz-pantalla, #resultado, #menu-config { display: none; }
@@ -114,25 +113,25 @@
             <input type="text" id="buscador-estudio" placeholder="🔍 Buscar en preguntas y alternativas..." oninput="filtrarPreguntasFlexible(this.value)">
         </div>
 
-        <!-- Controles de Navegación Rápida para Modo Estudio -->
-        <div class="navegacion-estudio" id="nav-estudio" style="display: none;">
+        <div class="progreso" id="progreso">Cargando...</div>
+        <div class="pregunta" id="texto-pregunta">Cargando...</div>
+        <div id="opciones"></div>
+        
+        <!-- Controles de Navegación Inferior unificados -->
+        <div class="navegacion-inferior" id="nav-inferior">
             <div class="nav-fila-botones">
-                <button class="btn-nav" onclick="preguntaAnteriorEstudio()">⬅️ Anterior</button>
-                <button class="btn-nav" onclick="siguientePreguntaEstudio()">Siguiente ➡️</button>
+                <button class="btn-nav" onclick="preguntaAnterior()">⬅️ Anterior</button>
+                <button class="btn-nav" id="btn-siguiente-nav" onclick="siguientePreguntaNav()">Siguiente ➡️</button>
             </div>
-            <div class="nav-fila-ir">
+            <div class="nav-fila-ir" id="fila-salto-estudio" style="display: none;">
                 <span>Ir a pregunta:</span>
                 <input type="number" id="input-num-pregunta" min="1" max="200" placeholder="Ej. 110">
                 <button class="btn-ir" onclick="saltarAPreguntaEstudio()">Ir</button>
             </div>
         </div>
 
-        <div class="progreso" id="progreso">Cargando...</div>
-        <div class="pregunta" id="texto-pregunta">Cargando...</div>
-        <div id="opciones"></div>
-        
         <div class="botones-accion">
-            <button id="btn-siguiente" class="btn-accion-principal" onclick="siguientePregunta()">Siguiente Pregunta</button>
+            <button id="btn-siguiente" class="btn-accion-principal" onclick="siguientePreguntaExamen()">Siguiente Pregunta</button>
             <button class="btn-volver" onclick="volverAlMenu()">Regresar al Menú</button>
         </div>
     </div>
@@ -161,6 +160,7 @@
     let preguntaActual = 0;
     let puntaje = 0;
     let modoActual = '';
+    let maxPreguntaAlcanzada = 0; // Controla hasta dónde avanzó en modo secuencial/aleatorio
 
     async function cargarBanco() {
         try {
@@ -189,18 +189,22 @@
 
         preguntaActual = 0;
         puntaje = 0;
+        maxPreguntaAlcanzada = 0;
 
         const buscadorEl = document.getElementById("contenedor-buscador");
-        const navEstudioEl = document.getElementById("nav-estudio");
+        const navInferiorEl = document.getElementById("nav-inferior");
+        const filaSaltoEstudio = document.getElementById("fila-salto-estudio");
+
+        navInferiorEl.style.display = "block";
 
         if (modo === 'estudio') {
             buscadorEl.style.display = "block";
-            navEstudioEl.style.display = "block";
+            filaSaltoEstudio.style.display = "flex";
             document.getElementById("buscador-estudio").value = "";
             document.getElementById("input-num-pregunta").max = bancoCompleto.length;
         } else {
             buscadorEl.style.display = "none";
-            navEstudioEl.style.display = "none";
+            filaSaltoEstudio.style.display = "none";
         }
 
         document.getElementById("menu-config").style.display = "none";
@@ -217,12 +221,8 @@
         const contenedorOpciones = document.getElementById("opciones");
         contenedorOpciones.innerHTML = ""; 
         
-        const btnSiguiente = document.getElementById("btn-siguiente");
-        if (modoActual === 'estudio') {
-            btnSiguiente.style.display = "none";
-        } else {
-            btnSiguiente.style.display = "block";
-        }
+        const btnSiguienteExamen = document.getElementById("btn-siguiente");
+        btnSiguienteExamen.style.display = "none"; // Usamos siempre la barra inferior unificada
 
         pre.opciones.forEach((opcion, index) => {
             const btn = document.createElement("button");
@@ -242,17 +242,29 @@
                 }
             } else {
                 btn.innerText = opcion;
-                btn.onclick = () => verificarRespuesta(index, btn);
+                // Si ya había respondido esta pregunta antes, marcar su estado visual
+                if (pre.hasOwnProperty('seleccionUsuario')) {
+                    btn.disabled = true;
+                    if (index === pre.respuestaCorrecta) {
+                        btn.classList.add("correcta");
+                    } else if (index === pre.seleccionUsuario) {
+                        btn.classList.add("incorrecta");
+                    }
+                } else {
+                    btn.onclick = () => verificarRespuestaExamen(index, btn);
+                }
             }
             
             contenedorOpciones.appendChild(btn);
         });
     }
 
-    function verificarRespuesta(indiceSeleccionado, botonSeleccionado) {
+    function verificarRespuestaExamen(indiceSeleccionado, botonSeleccionado) {
+        const pre = preguntasActivas[preguntaActual];
         const botones = document.querySelectorAll(".opcion");
-        const indiceCorrecto = preguntasActivas[preguntaActual].respuestaCorrecta;
+        const indiceCorrecto = pre.respuestaCorrecta;
 
+        pre.seleccionUsuario = indiceSeleccionado;
         botones.forEach(btn => btn.disabled = true);
 
         if (indiceSeleccionado === indiceCorrecto) {
@@ -263,29 +275,38 @@
             botones[indiceCorrecto].classList.add("correcta");
         }
 
-        document.getElementById("btn-siguiente").style.display = "block";
-    }
-
-    function siguientePregunta() {
-        preguntaActual++;
-        if (preguntaActual < preguntasActivas.length) {
-            cargarPregunta();
-        } else {
-            mostrarResultados();
+        // Permitir avanzar un paso más al responder
+        if (preguntaActual >= maxPreguntaAlcanzada) {
+            maxPreguntaAlcanzada = preguntaActual + 1;
         }
     }
 
-    function preguntaAnteriorEstudio() {
+    function preguntaAnterior() {
         if (preguntaActual > 0) {
             preguntaActual--;
             cargarPregunta();
         }
     }
 
-    function siguientePreguntaEstudio() {
-        if (preguntaActual < preguntasActivas.length - 1) {
-            preguntaActual++;
-            cargarPregunta();
+    function siguientePreguntaNav() {
+        if (modoActual === 'estudio') {
+            if (preguntaActual < preguntasActivas.length - 1) {
+                preguntaActual++;
+                cargarPregunta();
+            }
+        } else {
+            // En modos secuencial, aleatorio o examen, solo avanza si ya respondió o si ya fue visitada y está dentro del límite alcanzado
+            const pre = preguntasActivas[preguntaActual];
+            if (pre.hasOwnProperty('seleccionUsuario') || preguntaActual < maxPreguntaAlcanzada) {
+                if (preguntaActual < preguntasActivas.length - 1) {
+                    preguntaActual++;
+                    cargarPregunta();
+                } else {
+                    mostrarResultados();
+                }
+            } else {
+                alert("Debes responder la pregunta actual antes de avanzar.");
+            }
         }
     }
 
