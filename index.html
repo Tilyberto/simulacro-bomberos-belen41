@@ -160,7 +160,7 @@
     let preguntaActual = 0;
     let puntaje = 0;
     let modoActual = '';
-    let maxPreguntaAlcanzada = 0; // Controla hasta dónde avanzó en modo secuencial/aleatorio
+    let maxPreguntaAlcanzada = 0;
 
     async function cargarBanco() {
         try {
@@ -175,6 +175,10 @@
         if (bancoCompleto.length === 0) {
             await cargarBanco();
         }
+
+        // CORRECCIÓN DEFINITIVA: Limpiar la memoria residual de las selecciones del usuario
+        // Esto asegura que cada examen empiece en blanco y sume los puntos correctamente.
+        bancoCompleto.forEach(pre => delete pre.seleccionUsuario);
 
         modoActual = modo;
 
@@ -222,7 +226,7 @@
         contenedorOpciones.innerHTML = ""; 
         
         const btnSiguienteExamen = document.getElementById("btn-siguiente");
-        btnSiguienteExamen.style.display = "none"; // Usamos siempre la barra inferior unificada
+        btnSiguienteExamen.style.display = "none"; 
 
         pre.opciones.forEach((opcion, index) => {
             const btn = document.createElement("button");
@@ -242,7 +246,7 @@
                 }
             } else {
                 btn.innerText = opcion;
-                // Si ya había respondido esta pregunta antes, marcar su estado visual
+                // Si la persona ya marcó esta respuesta DURANTE ESTE EXAMEN, se muestra sombreada
                 if (pre.hasOwnProperty('seleccionUsuario')) {
                     btn.disabled = true;
                     if (index === pre.respuestaCorrecta) {
@@ -275,7 +279,6 @@
             botones[indiceCorrecto].classList.add("correcta");
         }
 
-        // Permitir avanzar un paso más al responder
         if (preguntaActual >= maxPreguntaAlcanzada) {
             maxPreguntaAlcanzada = preguntaActual + 1;
         }
@@ -295,7 +298,6 @@
                 cargarPregunta();
             }
         } else {
-            // En modos secuencial, aleatorio o examen, solo avanza si ya respondió o si ya fue visitada y está dentro del límite alcanzado
             const pre = preguntasActivas[preguntaActual];
             if (pre.hasOwnProperty('seleccionUsuario') || preguntaActual < maxPreguntaAlcanzada) {
                 if (preguntaActual < preguntasActivas.length - 1) {
